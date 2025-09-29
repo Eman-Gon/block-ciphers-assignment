@@ -116,7 +116,20 @@ def encrypt_image(image_filename):
     
     print("Saved: ecb_encrypted.bmp and cbc_encrypted.bmp")
 
+# if __name__ == "__main__":
+#     encrypt_image('tux.bmp')
+    
+#     print("\n" + "=" * 50)
+#     print("Task 2: CBC Bit-Flipping Attack Demo")
+#     print("=" * 50)
+#     success = bitflip_attack()
+#     if success:
+#         print("\n✓ Attack worked! Got admin access.")
+#     else:
+#         print("\n✗ Attack failed.")
 if __name__ == "__main__":
+    # encrypt_image('tux.bmp')  # Uncomment when you have the BMP file
+    
     print("=" * 50)
     print("Task 2: CBC Bit-Flipping Attack Demo")
     print("=" * 50)
