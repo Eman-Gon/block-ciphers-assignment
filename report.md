@@ -34,3 +34,20 @@ Use authenticated encryption like AES-GCM or add HMAC to verify the ciphertext h
 ## Task 3: Performance Results
 
 [Add your OpenSSL speed test results and graphs here]
+
+
+
+## Task 1: ECB vs CBC Encryption
+
+### Original Image
+![](mustang.bmp)
+
+### ECB Encrypted
+![](ecb_encrypted.bmp)
+
+ECB encrypts each block independently. Identical plaintext blocks produce identical ciphertext blocks, so you can still see the mustang outline. This demonstrates why ECB is insecure for images.
+
+### CBC Encrypted
+![](cbc_encrypted.bmp)
+
+CBC XORs each block with the previous ciphertext before encrypting. The result looks completely random - no visible patterns. This is secure.
