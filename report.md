@@ -189,6 +189,6 @@ if __name__ == "__main__":
     print("=" * 50)
     success = bitflip_attack()
     if success:
-        print("\n✓ Attack worked! Got admin access.")
+        print("\n Attack worked! Got admin access.")
     else:
-        print("\n✗ Attack failed.")
+        print("\n Attack failed.")
