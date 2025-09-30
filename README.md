@@ -53,6 +53,7 @@ Creates `images/performance_comparison.png` showing AES vs RSA performance.
 - `report.md` - Assignment writeup
 - `mustang.bmp` - Original test image
 
+
 ## Tasks Completed
 
 - Task 1: ECB and CBC encryption implementation

@@ -1,14 +1,21 @@
 ## Task 1: ECB vs CBC Encryption
 
 ### Original Image
+
 ![](mustang.bmp)
 
 ### ECB Encrypted
+
 ![](ecb_encrypted.bmp)
 
 ECB encrypts each block independently. Identical plaintext blocks produce identical ciphertext blocks, so you can still see the mustang outline. This demonstrates why ECB is insecure for images.
 
+### Original Image
+
+![](cp-logo.bmp)
+
 ### CBC Encrypted
+
 ![](cbc_encrypted.bmp)
 
 CBC XORs each block with the previous ciphertext before encrypting. The result looks completely random - no visible patterns. This is secure.
@@ -19,10 +26,11 @@ CBC XORs each block with the previous ciphertext before encrypting. The result l
 Saved: ecb_encrypted.bmp and cbc_encrypted.bmp
 Task 2: CBC Bit-Flipping Attack Demo
 Before attack: verify() = False
-After attack:  verify() = True
+After attack: verify() = True
 Attack worked! Got admin access.
 
 **How it works:**
+
 - Flipping a bit in ciphertext block N scrambles plaintext block N
 - But it flips the same bit in plaintext block N+1
 - I sent "AAAA..." as input and flipped bits to change it to ";admin=true;"
@@ -38,11 +46,13 @@ Use authenticated encryption like AES-GCM or add HMAC to verify the ciphertext h
 ![](images/performance_comparison.png)
 
 **AES Performance:**
+
 - AES-128: 1,552 MB/s
 - AES-192: 1,279 MB/s
 - AES-256: 1,106 MB/s
 
 **RSA Performance (Sign operations):**
+
 - RSA-1024: 11,055 ops/s
 - RSA-2048: 1,348 ops/s
 - RSA-4096: 215 ops/s
@@ -62,6 +72,7 @@ The attack works because CBC mode has no integrity protection. When you flip a b
 AES is dramatically faster than RSA - over 1000x faster. AES-128 processes 1,552 MB/s while RSA-1024 only does 11,055 sign operations per second. As key sizes increase, both algorithms slow down, but RSA degrades much more severely (RSA-4096 is only 215 ops/s). This massive performance difference is why real-world systems use hybrid encryption: RSA for key exchange and AES for encrypting actual data.
 
 ## Code
+
 ```python
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
@@ -147,17 +158,17 @@ def bitflip_attack():
     padding_needed = BLOCK_SIZE - (prefix_len % BLOCK_SIZE)
     userdata = "A" * (padding_needed + BLOCK_SIZE)
     original_ct = submit(userdata)
-    
+
     print("Before attack: verify() =", verify(original_ct))
-    
+
     ct_list = list(original_ct)
     target_block_num = (prefix_len + padding_needed) // BLOCK_SIZE
     previous_block_start = (target_block_num - 1) * BLOCK_SIZE
     injection = b";admin=true;"
-    
+
     for i in range(len(injection)):
         ct_list[previous_block_start + i] ^= ord('A') ^ injection[i]
-    
+
     modified_ct = bytes(ct_list)
     print("After attack:  verify() =", verify(modified_ct))
     return verify(modified_ct)
@@ -165,30 +176,31 @@ def bitflip_attack():
 def encrypt_image(image_filename):
     with open(image_filename, 'rb') as f:
         data = f.read()
-    
+
     header = data[:54]
     image_data = data[54:]
     key = get_random_bytes(16)
     iv = get_random_bytes(16)
-    
+
     ecb_result = ecb_encrypt(key, image_data)
     with open('ecb_encrypted.bmp', 'wb') as f:
         f.write(header + ecb_result[:len(image_data)])
-    
+
     cbc_result = cbc_encrypt(key, iv, image_data)
     with open('cbc_encrypted.bmp', 'wb') as f:
         f.write(header + cbc_result[:len(image_data)])
-    
+
     print("Saved: ecb_encrypted.bmp and cbc_encrypted.bmp")
 
 if __name__ == "__main__":
     encrypt_image('mustang.bmp')
-    
+
     print("\n" + "=" * 50)
     print("Task 2: CBC Bit-Flipping Attack Demo")
     print("=" * 50)
     success = bitflip_attack()
     if success:
-        print("\n Attack worked! Got admin access.")
+        print("\n✓ Attack worked! Got admin access.")
     else:
         print("\n Attack failed.")
+```
