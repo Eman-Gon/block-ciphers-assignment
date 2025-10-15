@@ -118,11 +118,10 @@ def encrypt_image(image_filename):
 if __name__ == "__main__":
     encrypt_image('mustang.bmp')
     
-    print("\n" + "=" * 50)
     print("Task 2: CBC Bit-Flipping Attack Demo")
-    print("=" * 50)
     success = bitflip_attack()
     if success:
         print("\n✓ Attack worked! Got admin access.")
     else:
+        
         print("\n✗ Attack failed.")
