@@ -1,0 +1,337 @@
+===============================================================================
+IMPLEMENTATION HINTS & TIPS
+Based on Professor Yocam's Guidance
+===============================================================================
+
+TASK 1: SHA256 COLLISION FINDING
+===============================================================================
+
+APPROACH 1: Weak Collision Resistance (Target Hash)
+---------------------------------------------------
+Given m0, find m1 such that H(m0) = H(m1) and m0 ≠ m1
+
+Pseudocode:
+    target = truncate_hash(sha256(m0), bits)
+    while True:
+        m1 = random_string()
+        if truncate_hash(sha256(m1), bits) == target and m1 != m0:
+            return m0, m1
+
+Pros: Simple to implement
+Cons: Slower than birthday approach
+
+APPROACH 2: Birthday Paradox (Recommended)
+------------------------------------------
+For any two messages m0 and m1 where m0 ≠ m1, find H(m0) = H(m1)
+
+Pseudocode:
+    seen = {}  # dictionary mapping hash -> input
+    while True:
+        m = random_string()
+        h = truncate_hash(sha256(m), bits)
+        if h in seen:
+            return seen[h], m  # Collision found!
+        seen[h] = m
+
+Pros: Much faster (2^(n/2) vs 2^n operations)
+Cons: Uses more memory
+
+MEMORY MANAGEMENT:
+For large bit sizes (48-50 bits):
+- Dictionary size can reach millions of entries
+- Each entry: string (10 bytes) + hash (4-8 bytes) + overhead
+- Estimate: ~50 bytes per entry
+- 50-bit collision: ~33M entries × 50 bytes = ~1.6 GB
+- Ensure adequate RAM available
+
+EFFICIENCY TIPS:
+- Use hash tables (Python dict) for O(1) lookup
+- Generate random strings efficiently
+- Consider progress indicators for large runs
+- Save intermediate results in case of crash
+
+===============================================================================
+TASK 2: BCRYPT PASSWORD CRACKING
+===============================================================================
+
+BCRYPT STRUCTURE:
+----------------
+$2b$08$J9FW66ZdPI2nrIMcOxFYI.qx268uZn.ajhymLP/YHaAsfBGP3Fnmq
+│  │  │ │                      │
+│  │  │ └─ Salt (22 chars)    └─ Hash (31 chars)
+│  │  └─ Workfactor
+│  └─ Algorithm version
+└─ Bcrypt prefix
+
+KEY INSIGHT: Salt Structure
+---------------------------
+For hashpw() function, you need:
+- First 29 characters: "$2b$08$" + 22-char salt
+- NOT just the 22-char salt alone
+
+Example:
+Full hash:  $2b$08$J9FW66ZdPI2nrIMcOxFYI.qx268uZn.ajhymLP/YHaAsfBGP3Fnmq
+Salt for hashpw: $2b$08$J9FW66ZdPI2nrIMcOxFYI.
+
+TWO METHODS FOR VERIFICATION:
+-----------------------------
+
+Method 1: hashpw() - Manual comparison
+    computed = bcrypt.hashpw(b"password", b"$2b$08$J9FW66ZdPI2nrIMcOxFYI.")
+    if computed == full_hash:
+        # Password found!
+
+Method 2: checkpw() - Automatic (Recommended)
+    if bcrypt.checkpw(b"password", full_hash):
+        # Password found!
+
+Method 2 is simpler and handles the salt extraction automatically.
+
+OPTIMIZATION STRATEGIES:
+-----------------------
+
+Strategy 1: Group by Workfactor
+- Process all workfactor 8 users together
+- Then workfactor 9, etc.
+- Avoids repeatedly hashing same words at different workfactors
+
+Strategy 2: Parallel Processing
+- Split dictionary into chunks
+- Run each chunk on separate CPU core
+- First core to find match signals others to stop
+
+Example parallel approach:
+    def crack_user(username, hash, wordlist_chunk):
+        for word in wordlist_chunk:
+            if bcrypt.checkpw(word, hash):
+                return word
+        return None
+    
+    # Split wordlist into N chunks for N cores
+    chunks = split_wordlist(wordlist, num_cores)
+    with Pool(num_cores) as pool:
+        results = pool.map(crack_user, chunks)
+
+Strategy 3: Smart Dictionary Ordering
+- Common words appear early in NLTK corpus
+- Many passwords will be found quickly
+- Long tail of uncommon words takes most time
+
+PERFORMANCE EXPECTATIONS:
+------------------------
+Based on M1 MacBook Air (as reference):
+
+Workfactor 8:  30ms per hash
+- 135,000 words × 30ms = 4,050 seconds = 67.5 minutes
+- With 8 cores: ~8.4 minutes
+
+Workfactor 10: 110ms per hash
+- 135,000 words × 110ms = 14,850 seconds = 4.1 hours
+- With 8 cores: ~31 minutes
+
+Workfactor 12: 420ms per hash
+- 135,000 words × 420ms = 56,700 seconds = 15.75 hours
+- With 8 cores: ~2 hours
+
+Workfactor 13: 840ms per hash
+- 135,000 words × 840ms = 113,400 seconds = 31.5 hours
+- With 8 cores: ~4 hours
+
+TOTAL ESTIMATED TIME:
+- Sequential: ~150-200 hours (6-8 days)
+- 8 cores parallel: ~20-25 hours (1 day)
+- 16 cores parallel: ~10-12 hours
+
+IMPORTANT NOTES:
+---------------
+1. Actual time varies based on:
+   - CPU speed
+   - Where password appears in dictionary
+   - System load (other processes)
+   
+2. You may get lucky:
+   - If password is "aardvark" (early in dict): Quick!
+   - If password is "zygote" (late in dict): Long wait
+
+3. Progress tracking:
+   - Print every N attempts (e.g., every 10,000)
+   - Shows hashing rate (hashes/second)
+   - Helps estimate time remaining
+
+4. Consider partial completion:
+   - Crack workfactors 8-11 first
+   - Submit partial results if time constrained
+   - Continue working on 12-13 after submission
+
+===============================================================================
+NLTK WORD CORPUS
+===============================================================================
+
+LOADING THE CORPUS:
+------------------
+import nltk
+from nltk.corpus import words
+
+# First time only - download corpus
+nltk.download('words')
+
+# Load words
+word_list = words.words()
+
+# Filter for 6-10 letters (lowercase)
+filtered = [w.lower() for w in word_list if 6 <= len(w) <= 10]
+
+CORPUS STATISTICS:
+-----------------
+- Total words: ~235,000
+- 6-10 letter words: ~135,000
+- All lowercase in this assignment
+- English dictionary words
+- Includes common and uncommon words
+
+EXAMPLE WORDS:
+- Common: "password", "dragon", "wizard", "hobbit"
+- Less common: "zephyr", "quartz", "fjord"
+- Very rare: "xystus", "zymosis"
+
+===============================================================================
+DEBUGGING TIPS
+===============================================================================
+
+TASK 1 ISSUES:
+-------------
+Problem: Collision takes too long
+Solution: 
+- Check bit size (50-bit can take 30+ minutes)
+- Verify truncation function works correctly
+- Add progress indicators
+
+Problem: Out of memory
+Solution:
+- Reduce max_attempts parameter
+- Clear seen dictionary periodically (loses progress)
+- Run smaller bit sizes only
+
+Problem: Wrong collision count
+Solution:
+- Verify hash function implementation
+- Check truncation is consistent
+- Ensure no duplicate inputs being tried
+
+TASK 2 ISSUES:
+-------------
+Problem: bcrypt.checkpw() always returns False
+Solution:
+- Verify full hash is in bytes: b"$2b$..."
+- Ensure password is in bytes: word.encode()
+- Check hash format is correct
+
+Problem: Too slow
+Solution:
+- Confirm bcrypt installed correctly
+- Check CPU isn't thermal throttling
+- Consider parallel processing
+- Try lower workfactors first
+
+Problem: Can't find any passwords
+Solution:
+- Verify NLTK corpus downloaded
+- Check word filtering (6-10 letters)
+- Ensure lowercase conversion
+- Try test vector: hashpw(b"password", salt)
+
+===============================================================================
+TEST VECTORS FOR VERIFICATION
+===============================================================================
+
+TASK 1 TEST VECTOR:
+------------------
+Input: "Hello, World!"
+SHA256: dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f
+
+8-bit truncation (first 8 bits): 0xdf = 223
+16-bit truncation (first 16 bits): 0xdffd = 57341
+
+TASK 2 TEST VECTOR:
+------------------
+From assignment instructions:
+hashpw(b"registrationsucks", b"$2b$08$J9FW66ZdPI2nrIMcOxFYI.")
+Should produce:
+b'$2b$08$J9FW66ZdPI2nrIMcOxFYI.zKGJsUXmWLAYWsNmIANUy5JbSjfyLFu'
+
+If this matches, your bcrypt setup is correct!
+
+===============================================================================
+COMMON PITFALLS TO AVOID
+===============================================================================
+
+1. FORGETTING TO START EARLY
+   Task 2 takes DAYS - start immediately!
+
+2. NOT SAVING PROGRESS
+   If program crashes after 3 days, you lose everything
+   Solution: Save cracked passwords as you find them
+
+3. INEFFICIENT COLLISION FINDING
+   Using target hash method instead of birthday paradox
+   Solution: Use dictionary/hashtable approach
+
+4. INCORRECT SALT HANDLING
+   Only using 22-char salt instead of 29-char prefix
+   Solution: Include "$2b$WF$" before salt
+
+5. NOT VERIFYING TEST VECTORS
+   Running full program without testing basic functionality
+   Solution: Use test_task1.py and test_task2.py first
+
+6. INSUFFICIENT MEMORY FOR LARGE BITS
+   Trying 50-bit without enough RAM
+   Solution: Monitor memory usage, consider smaller bit range
+
+7. NOT UNDERSTANDING OUTPUT
+   Getting collisions but not analyzing the results
+   Solution: Compare with theoretical expectations (2^(n/2))
+
+8. MISSING DEMONSTRATION PREP
+   Not preparing for live demo with instructor
+   Solution: Practice explaining code, showing one crack
+
+===============================================================================
+FINAL CHECKLIST BEFORE RUNNING
+===============================================================================
+
+TASK 1:
+- [ ] Test script runs successfully (test_task1.py)
+- [ ] Understand birthday paradox approach
+- [ ] Have sufficient RAM for 50-bit (check ~2GB free)
+- [ ] matplotlib installed for graphs
+- [ ] Plan to run overnight (30-60 minutes)
+
+TASK 2:
+- [ ] Test script runs successfully (test_task2.py)
+- [ ] bcrypt and nltk installed
+- [ ] NLTK words corpus downloaded
+- [ ] shadow.txt file available
+- [ ] Computer can run continuously for days
+- [ ] Consider parallel processing option
+- [ ] Plan to start IMMEDIATELY (6-8 days!)
+
+REPORT:
+- [ ] Understand all concepts (don't just copy code)
+- [ ] Have answers ready for all 4 questions
+- [ ] Know how to explain implementations
+- [ ] Team members can all explain the work
+
+===============================================================================
+GOOD LUCK!
+===============================================================================
+
+Remember:
+- Start Task 2 immediately (longest runtime)
+- Test everything with small examples first
+- Save your progress frequently
+- Understand the cryptographic concepts
+- Prepare for demonstration
+
+You've got this!
+===============================================================================

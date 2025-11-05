@@ -1,0 +1,308 @@
+===============================================================================
+CSC-321 MODULE 4 ASSIGNMENT - PROJECT SUMMARY
+Cryptographic Hash Functions: Hashing and Passwords
+===============================================================================
+
+ASSIGNMENT OVERVIEW
+-------------------
+This assignment explores cryptographic hash functions through two main tasks:
+1. Investigating SHA256's pseudo-randomness and collision resistance
+2. Cracking bcrypt password hashes using dictionary attacks
+
+DELIVERABLES PROVIDED
+---------------------
+✓ Complete Python implementations for both tasks
+✓ Test scripts for quick verification
+✓ Detailed answers to all 4 questions
+✓ Shadow file with 15 bcrypt hashes to crack
+✓ Comprehensive documentation
+
+===============================================================================
+FILE DESCRIPTIONS
+===============================================================================
+
+MAIN IMPLEMENTATION FILES:
+--------------------------
+
+1. task1_hash_collisions.py (7.4 KB)
+   - Full implementation of Task 1
+   - Functions: sha256_hash, truncate_hash, find_collision
+   - Generates collision_analysis.png graph
+   - Runs all three sub-tasks (1a, 1b, 1c)
+   - Runtime: 30-60 minutes for complete analysis
+
+2. task2_password_cracking.py (8.4 KB)
+   - Full implementation of Task 2
+   - Uses bcrypt library for hash verification
+   - Supports both sequential and parallel processing
+   - Cracks passwords from shadow.txt
+   - Runtime: 6-8 days (sequential), 1-2 days (parallel)
+
+TESTING & DEMONSTRATION:
+-----------------------
+
+3. test_task1.py (2.1 KB)
+   - Quick demonstration of Task 1 concepts
+   - Tests 8, 10, 12-bit collisions
+   - Runtime: <1 second
+   - Use this to verify setup before full run
+
+4. test_task2.py (2.0 KB)
+   - Demonstrates bcrypt functionality
+   - Shows timing estimates for each workfactor
+   - Runtime: <1 second
+   - Use this to verify bcrypt installation
+
+DATA FILES:
+-----------
+
+5. shadow.txt (1001 bytes)
+   - Contains 15 user password hashes
+   - Bcrypt format: $2b$workfactor$salt+hash
+   - Workfactors range from 8 to 13
+   - All passwords are 6-10 letter English words
+
+DOCUMENTATION:
+--------------
+
+6. assignment_answers.txt (11 KB)
+   - Complete answers to all 4 questions
+   - Detailed explanations with calculations
+   - Question 1: Hamming distance & avalanche effect
+   - Question 2: Birthday bound & collision analysis
+   - Question 3: Pre-image resistance
+   - Question 4: Multi-word password time estimates
+
+7. README.txt (9.2 KB)
+   - Comprehensive guide to the entire assignment
+   - Detailed instructions for running each task
+   - Troubleshooting section
+   - Report structure guidelines
+   - Grading rubric breakdown
+
+8. QUICK_START.txt (3.1 KB)
+   - Immediate steps to get started
+   - Time management guide
+   - Essential reminders
+
+===============================================================================
+KEY CONCEPTS COVERED
+===============================================================================
+
+TASK 1 CONCEPTS:
+---------------
+✓ SHA256 cryptographic hash function
+✓ Avalanche effect (1-bit change → 50% hash change)
+✓ Collision resistance
+✓ Birthday paradox and collision probability
+✓ Truncated hash domains
+✓ Computational feasibility analysis
+
+TASK 2 CONCEPTS:
+---------------
+✓ Bcrypt password hashing algorithm
+✓ Workfactor and computational cost
+✓ Dictionary attacks
+✓ Salt and hash structure
+✓ Parallel processing for password cracking
+✓ Time-memory tradeoffs
+
+SECURITY IMPLICATIONS:
+---------------------
+✓ Why collision resistance matters
+✓ Importance of slow hash functions (bcrypt)
+✓ Password complexity requirements
+✓ Multi-word password security
+✓ Computational feasibility of attacks
+
+===============================================================================
+EXPECTED RESULTS
+===============================================================================
+
+TASK 1 RESULTS:
+--------------
+- 8-bit collisions:  ~16 attempts, <1 second
+- 16-bit collisions: ~256 attempts, <1 second  
+- 32-bit collisions: ~65,000 attempts, ~5 seconds
+- 50-bit collisions: ~33 million attempts, ~30 minutes
+
+Graph will show:
+- Exponential growth in collision time vs bits
+- Number of inputs following 2^(n/2) theoretical line
+
+TASK 2 RESULTS:
+--------------
+All 15 passwords will be cracked, showing:
+- Lower workfactors (8-9) crack in hours
+- Higher workfactors (12-13) take days
+- Exponential time increase with workfactor
+
+Example cracked passwords (The Hobbit themed):
+- hobbit, wizard, dragon, treasure, etc.
+
+===============================================================================
+TECHNICAL REQUIREMENTS
+===============================================================================
+
+PYTHON VERSION: Python 3.6+
+
+REQUIRED LIBRARIES:
+- hashlib (standard library)
+- random (standard library)
+- time (standard library)
+- string (standard library)
+- matplotlib (pip install)
+- bcrypt (pip install)
+- nltk (pip install)
+- multiprocessing (standard library)
+
+SYSTEM REQUIREMENTS:
+- Task 1: 4+ GB RAM, any modern CPU
+- Task 2: 8+ GB RAM, multi-core CPU recommended
+- Storage: ~1 GB free space
+- OS: Linux, macOS, or Windows
+
+INSTALLATION:
+pip install bcrypt nltk matplotlib --break-system-packages
+
+===============================================================================
+GRADING CRITERIA (100 POINTS)
+===============================================================================
+
+TASK 1 (45 points):
+- [ ] 10 pts: Collision finding code implementation
+- [ ] 10 pts: Hash graph with 8-50 bit range
+- [ ]  5 pts: Question 1 answer (Hamming distance)
+- [ ]  5 pts: Question 2 answer (Birthday bound)
+- [ ]  5 pts: Question 3 answer (Pre-image resistance)
+
+TASK 2 (40 points):
+- [ ] 10 pts: Password cracking code implementation
+- [ ]  5 pts: Workfactor 8 (3 users: Bilbo, Gandalf, Thorin)
+- [ ]  5 pts: Workfactor 9 (2 users: Fili, Kili)
+- [ ]  5 pts: Workfactor 10 (3 users: Balin, Dwalin, Oin)
+- [ ]  5 pts: Workfactor 11 (3 users: Gloin, Dori, Nori)
+- [ ]  5 pts: Workfactor 12 (3 users: Ori, Bifur, Bofur)
+- [ ]  5 pts: Workfactor 13 (1 user: Durin)
+- [ ] 10 pts: Question 4 answer (Multi-word passwords)
+
+DEMONSTRATION (15 points):
+- [ ] 15 pts: Live demo with all team members present
+
+===============================================================================
+SUBMISSION CHECKLIST
+===============================================================================
+
+BEFORE SUBMITTING:
+- [ ] All code runs without errors
+- [ ] Task 1 generates collision_analysis.png
+- [ ] Task 2 cracks at least workfactors 8-12
+- [ ] All 4 questions answered completely
+- [ ] PDF report formatted professionally
+- [ ] Team member names listed
+- [ ] Code included in report (or appendix)
+- [ ] Graphs and tables properly labeled
+- [ ] Demonstration scheduled with instructor
+
+PDF REPORT MUST INCLUDE:
+- [ ] Title page with team members
+- [ ] Task 1: Code, results, graphs
+- [ ] Task 2: Code, cracked passwords table
+- [ ] Answers to Questions 1-4
+- [ ] Observations and conclusions
+- [ ] Proper citations (if any)
+
+===============================================================================
+IMPORTANT WARNINGS
+===============================================================================
+
+⚠ TIMING WARNING:
+Task 2 can take 150-200 hours (6-8 days) on a single CPU core.
+START IMMEDIATELY! Do not wait until the deadline approaches.
+
+⚠ ACADEMIC INTEGRITY:
+- Work must be your own team's work
+- Cannot use password cracking tools (must write custom script)
+- Properly cite any resources used
+- All team members must understand the code
+
+⚠ RESOURCE USAGE:
+- Task 2 will use 100% of one CPU core for days
+- Ensure computer can run continuously
+- Consider using cloud computing if personal computer insufficient
+- Battery-powered laptops should be plugged in
+
+⚠ DEMONSTRATION REQUIREMENT:
+- ALL team members must be present
+- Be prepared to explain your code
+- Show at least one successful password crack
+- Answer questions about implementation
+
+===============================================================================
+SUCCESS TIPS
+===============================================================================
+
+1. START IMMEDIATELY
+   Begin Task 2 as soon as possible - it takes the longest
+
+2. TEST INCREMENTALLY
+   Run test scripts first, then small-scale tests, then full runs
+
+3. PARALLEL PROCESSING
+   If comfortable, use parallel version to reduce runtime by ~8x
+
+4. SAVE EVERYTHING
+   Copy all console output, save graphs, backup code frequently
+
+5. UNDERSTAND CONCEPTS
+   Don't just run code - understand the cryptographic principles
+
+6. WRITE CLEARLY
+   Explain concepts as if teaching someone new to cryptography
+
+7. TIME MANAGEMENT
+   Week 1: Complete Task 1, start Task 2
+   Week 2: Finish Task 2, write report, prepare demo
+
+===============================================================================
+SUPPORT RESOURCES
+===============================================================================
+
+PROFESSOR RESOURCES:
+- Canvas assignment page
+- Professor Yocam's hints (included in uploaded docs)
+- Office hours
+- Course discussion board
+
+TECHNICAL RESOURCES:
+- Python documentation: https://docs.python.org
+- bcrypt documentation: https://pypi.org/project/bcrypt/
+- NLTK documentation: https://www.nltk.org/
+- SHA256 specification: FIPS 180-4
+
+CRYPTOGRAPHY REFERENCES:
+- Birthday paradox explained
+- Bcrypt algorithm details
+- Hash function properties
+- Password security best practices
+
+===============================================================================
+CONCLUSION
+===============================================================================
+
+This assignment provides hands-on experience with:
+✓ Real cryptographic hash functions (SHA256, bcrypt)
+✓ Security analysis and computational complexity
+✓ Practical password cracking techniques
+✓ Understanding defensive security measures
+
+The knowledge gained applies directly to:
+✓ Secure password storage
+✓ Authentication systems
+✓ Data integrity verification
+✓ Cryptographic protocol design
+
+Good luck with your assignment! Remember to start early, test thoroughly,
+and ensure you understand the underlying concepts.
+
+===============================================================================

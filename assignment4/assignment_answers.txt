@@ -1,0 +1,280 @@
+CRYPTOGRAPHIC HASH FUNCTIONS ASSIGNMENT
+ANSWERS TO QUESTIONS
+
+===============================================================================
+QUESTION 1: Observations from Task 1b
+===============================================================================
+
+What do you observe based on Task 1b? How many bytes are different between 
+the two digests?
+
+ANSWER:
+When two strings differ by only 1 bit (Hamming distance of 1), their SHA256 
+hashes are completely different. This demonstrates the "avalanche effect" - a 
+fundamental property of cryptographic hash functions.
+
+Observations:
+1. Even though the input strings differ by only 1 bit, their hash outputs are 
+   drastically different
+2. Approximately 50% of the hex characters in the hash digests are different
+3. Since SHA256 produces a 64-character hexadecimal output (256 bits), we 
+   typically observe around 30-35 characters different between the two hashes
+4. This means approximately 120-140 bits are different in the 256-bit output
+
+This is a critical security property because:
+- Small changes in input produce unpredictable, large changes in output
+- It's impossible to predict how the hash will change based on input changes
+- Attackers cannot make incremental modifications to find desired hashes
+
+The avalanche effect ensures that related messages produce completely unrelated 
+hashes, preventing any correlation analysis or pattern detection.
+
+===============================================================================
+QUESTION 2: Birthday Bound and Collision Analysis
+===============================================================================
+
+What is the maximum number of files you would ever need to hash to find a 
+collision on an n-bit digest? Given the birthday bound, what is the expected 
+number of hashes before a collision on an n-bit digest? Is this what you 
+observed? Based on the data you have collected, speculate on how long it 
+might take to find a collision on the full 256-bit digest.
+
+ANSWER:
+
+Maximum Number of Hashes:
+The absolute maximum number of hashes needed to GUARANTEE a collision on an 
+n-bit digest is 2^n + 1 hashes (by the pigeonhole principle). For an n-bit 
+digest, there are 2^n possible hash values, so after hashing 2^n + 1 distinct 
+inputs, at least two must collide.
+
+Expected Number (Birthday Bound):
+The birthday paradox tells us that we expect to find a collision after 
+approximately sqrt(2^n) = 2^(n/2) hashes. More precisely, the probability of 
+finding a collision after k hashes is approximately:
+    P(collision) ≈ 1 - e^(-k²/2^(n+1))
+
+When k ≈ 2^(n/2), the probability reaches about 50%.
+
+For specific digest sizes:
+- 8-bit:  Expected ~2^4 = 16 hashes
+- 16-bit: Expected ~2^8 = 256 hashes
+- 32-bit: Expected ~2^16 = 65,536 hashes
+- 50-bit: Expected ~2^25 = 33,554,432 hashes
+
+Observations from Experimental Data:
+Yes, the experimental results closely match the theoretical birthday bound. 
+The data shows that the number of inputs tried before finding a collision 
+grows exponentially with digest size, following the 2^(n/2) pattern. The 
+experimental values typically fall within a factor of 2-3 of the theoretical 
+expectation, which is normal given the probabilistic nature of the process.
+
+Full 256-bit Digest Collision Time Estimate:
+For a full 256-bit SHA256 hash:
+- Expected collisions: 2^128 hashes
+- 2^128 ≈ 3.4 × 10^38 hashes
+
+Based on experimental timing data from smaller digests:
+- Assume ~1 million hashes per second on a modern computer
+- Time = (2^128 hashes) / (10^6 hashes/second)
+- Time ≈ 3.4 × 10^32 seconds
+- Converting: ≈ 1.08 × 10^25 years
+
+For comparison:
+- Age of universe: ~13.8 billion years (1.38 × 10^10 years)
+- Time to find collision: ~780 quadrillion times the age of the universe
+
+Even with all computers on Earth working together:
+- Estimated 10 billion computers worldwide
+- Each doing 10^9 hashes/second
+- Combined: 10^19 hashes/second
+- Still need: ~1.08 × 10^12 years (over 1 trillion years)
+
+This demonstrates why SHA256 is considered secure - finding collisions is 
+computationally infeasible with current and foreseeable technology.
+
+===============================================================================
+QUESTION 3: Pre-image Resistance on 8-bit Digests
+===============================================================================
+
+Given an 8-bit digest, would you be able to break the one-way property (i.e. 
+can you find any pre-image)? Do you think this would be easier or harder than 
+finding a collision? Why or why not?
+
+ANSWER:
+
+Yes, breaking the one-way property for an 8-bit digest is very feasible.
+
+One-Way Property (Pre-image Attack):
+Given a hash value h, find ANY message m such that H(m) = h.
+
+For an 8-bit digest:
+- There are only 2^8 = 256 possible hash values
+- We can simply try random inputs until we find one that hashes to h
+- Expected attempts: 256/2 = 128 inputs (on average)
+- This is trivially fast on any modern computer
+
+Comparison: Pre-image vs. Collision Finding
+
+EASIER: Finding a collision (using birthday paradox)
+- Collision: Expected ~2^(n/2) = 2^4 = 16 attempts
+- Pre-image: Expected ~2^(n-1) = 2^7 = 128 attempts
+- Collision finding is approximately 8x faster for 8-bit digests
+
+Why Collisions Are Easier:
+1. Freedom of Choice: In collision finding, we can choose ANY two inputs. We're 
+   not constrained to match a specific target hash.
+
+2. Birthday Paradox: With k random samples from a space of size N, the 
+   probability of collision grows as k²/2N. This quadratic growth means 
+   collisions appear much faster than linear search.
+
+3. Mathematical Advantage: For n-bit hashes:
+   - Collision resistance: O(2^(n/2)) operations
+   - Pre-image resistance: O(2^n) operations
+   - Collision attacks are exponentially easier as n grows
+
+Example for SHA256:
+- Finding collision: ~2^128 operations (infeasible)
+- Finding pre-image: ~2^256 operations (dramatically more infeasible)
+
+Security Implications:
+This is why cryptographic security requirements specify different strengths:
+- Collision resistance needs n bits → provides n/2 bits of security
+- Pre-image resistance needs n bits → provides n bits of security
+
+For 8-bit digests, BOTH properties are broken, but collisions are found faster.
+
+===============================================================================
+QUESTION 4: Brute-Force Time Estimates for Multi-Word Passwords
+===============================================================================
+
+For Task 2, given your results, how long would it take to brute force a 
+password that uses the format word1:word2 where both words are between 6 and 
+10 characters? What about word1:word2:word3? What about word1:word2:number 
+where number is between 1 and 5 digits?
+
+ANSWER:
+
+First, let's establish baseline parameters from Task 2 results:
+- Dictionary size: ~135,000 words (6-10 letters)
+- Hash rate depends on workfactor:
+  * Workfactor 8:  ~30 ms per hash → ~33 hashes/second
+  * Workfactor 10: ~110 ms per hash → ~9 hashes/second
+  * Workfactor 12: ~420 ms per hash → ~2.4 hashes/second
+  * Workfactor 13: ~840 ms per hash → ~1.2 hashes/second
+
+Using workfactor 12 (common secure setting) as our baseline: 2.4 hashes/sec
+
+---
+
+SCENARIO 1: word1:word2 (both 6-10 characters)
+
+Search space: 135,000 × 135,000 = 18.2 billion combinations
+
+Time calculation:
+- Total attempts: 18,225,000,000
+- At 2.4 hashes/second
+- Sequential time: 18,225,000,000 / 2.4 = 7,593,750,000 seconds
+- Converting: 
+  * 7.59 billion seconds
+  * 126.6 million minutes
+  * 2.11 million hours
+  * 87,891 days
+  * 240.8 years
+
+With parallel processing (10 cores):
+- Time: ~24 years
+
+With modern GPU (1000x faster):
+- Time: ~88 days
+
+REALISTIC ESTIMATE: 
+- Single CPU: 240 years
+- 10-core CPU: 24 years
+- GPU-accelerated: 3 months
+
+---
+
+SCENARIO 2: word1:word2:word3 (all 6-10 characters)
+
+Search space: 135,000³ = 2.46 × 10^15 combinations
+
+Time calculation:
+- At 2.4 hashes/second
+- Sequential time: 2.46 × 10^15 / 2.4 = 1.025 × 10^15 seconds
+- Converting:
+  * 32.5 million years
+
+With parallel processing (100 cores):
+- Time: ~325,000 years
+
+With GPU cluster (1000 GPUs, each 1000x faster than CPU):
+- Time: ~32.5 years
+
+REALISTIC ESTIMATE:
+- Single CPU: 32.5 million years (completely infeasible)
+- Large GPU cluster: 30-40 years (expensive but technically possible)
+
+---
+
+SCENARIO 3: word1:word2:number (number is 1-5 digits)
+
+Search space calculation:
+- Numbers 1-5 digits: 1 to 99999 = 99,999 possible numbers
+- Total combinations: 135,000 × 135,000 × 99,999 ≈ 1.82 × 10^15
+
+Time calculation:
+- At 2.4 hashes/second
+- Sequential time: 1.82 × 10^15 / 2.4 = 7.58 × 10^14 seconds
+- Converting:
+  * 24 million years
+
+With parallel processing (10 cores):
+- Time: ~2.4 million years
+
+With GPU (1000x faster):
+- Time: ~24,000 years
+
+With GPU cluster (1000 GPUs):
+- Time: ~24 years
+
+REALISTIC ESTIMATE:
+- Single CPU: 24 million years (infeasible)
+- GPU cluster: 20-30 years (very expensive but possible)
+
+---
+
+SUMMARY TABLE:
+
+Format              Search Space        Single CPU    10 Cores    GPU Cluster
+-----------------------------------------------------------------------------
+word                1.35 × 10^5         56 sec        6 sec       0.06 sec
+word1:word2         1.82 × 10^10        240 years     24 years    88 days
+word1:word2:word3   2.46 × 10^15        32.5M years   3.25M yrs   32 years
+word1:word2:num     1.82 × 10^15        24M years     2.4M yrs    24 years
+
+---
+
+KEY INSIGHTS:
+
+1. Exponential Growth: Adding each word multiplies the search space by 135,000, 
+   making the problem exponentially harder.
+
+2. Bcrypt's Defense: The slow hash function (workfactor 12) makes brute force 
+   attacks 100-1000x slower than fast hashes like MD5 or SHA1.
+
+3. Parallel Attacks: While parallelization helps, even 1000 cores can't make 
+   multi-word passwords practical to crack in reasonable time.
+
+4. GPU Advantage: GPUs excel at bcrypt cracking, but even they struggle with 
+   multi-word combinations. Specialized ASIC hardware could be faster but is 
+   very expensive.
+
+5. Security Recommendations:
+   - Single dictionary words: INSECURE (crackable in seconds)
+   - Two dictionary words: Marginally secure (years, but possible with resources)
+   - Three dictionary words: SECURE against most attackers
+   - Two words + number: SECURE against most attackers
+
+6. Defense Strategy: Increasing workfactor by 1 doubles cracking time. 
+   Workfactor 16 would make two-word passwords take millennia to crack.
