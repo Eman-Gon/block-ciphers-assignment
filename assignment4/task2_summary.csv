@@ -1,0 +1,38 @@
+TASK 2: PASSWORD CRACKING SUMMARY (PARALLEL MODE)
+""
+OVERALL STATISTICS
+Metric,Value
+Start Time,2025-11-04 23:24:29
+End Time,2025-11-07 13:46:22
+Total Wall-Clock Time,62.36 hours
+Total Users,15
+Passwords Cracked,14
+Total Processing Time,224512.67 seconds (62.36 hours)
+Average Time per User,14967.51 seconds
+""
+WORKFACTOR BREAKDOWN
+Workfactor,Users,Cracked,Avg Time (s),Total Time (s)
+8,3,3,646.57,1939.72
+9,2,2,4137.82,8275.65
+10,3,3,14734.52,44203.57
+11,3,3,15104.43,45313.30
+12,3,3,39398.93,118196.79
+13,1,0,6583.64,6583.64
+""
+INDIVIDUAL RESULTS
+Username,Password,Workfactor,Time (s),Attempts,Status
+Bilbo,welcome,8,636.35,131854,CRACKED
+Gandalf,wizard,8,668.67,133032,CRACKED
+Thorin,diamond,8,634.69,132931,CRACKED
+Fili,desire,9,1102.96,132193,CRACKED
+Kili,ossify,9,7172.69,127580,CRACKED
+Balin,hangout,10,30593.95,134295,CRACKED
+Dwalin,drossy,10,2660.51,119011,CRACKED
+Oin,ispaghul,10,10949.11,125231,CRACKED
+Gloin,oversave,11,13967.18,129281,CRACKED
+Dori,indoxylic,11,12951.15,123049,CRACKED
+Nori,swagsman,11,18394.97,128821,CRACKED
+Ori,airway,12,37394.92,120956,CRACKED
+Bifur,corrosible,12,38297.51,127557,CRACKED
+Bofur,libellate,12,42504.37,129885,CRACKED
+Durin,NOT_FOUND,13,6583.64,135145,FAILED
