@@ -49,7 +49,7 @@ def task_2_main(shadow_file_path):
     results = []
     
     for entry in remaining_entries:
-        result = crack_password_parallel(entry, wordlist, num_processes)
+        result = crack_password_cracked(entry, wordlist, num_processes)
         results.append(result)
     
     print("\nRESUMED SESSION COMPLETE")
