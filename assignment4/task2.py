@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-TASK 2: Password Cracking - FAST PARALLEL VERSION (macOS Fixed)
-Uses all CPU cores to crack passwords much faster (6-8x speedup!)
-"""
-
 import sys
 import os
 import time
@@ -13,7 +7,6 @@ import multiprocessing as mp
 from multiprocessing import Pool
 import threading
 
-# Import required modules with error handling
 try:
     import bcrypt
 except ImportError:
